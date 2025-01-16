@@ -1,0 +1,25 @@
+<%# This partial expects a 'booking' local variable %>
+<div class="bg-blue-50 border border-blue-200 rounded p-2 text-sm">
+  <div class="flex justify-between items-start">
+    <div>
+      <div class="font-semibold">Table <%= booking&.table&.number %></div>
+      <div><%= booking&.client_name %></div>
+      <div class="text-gray-600"><%= booking&.booking_date&.strftime("%I:%M %p") %></div>
+    </div>
+    <div>
+      <% if booking&.status == 'confirmed' %>
+        <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+          Confirmed
+        </span>
+      <% elsif booking&.status == 'pending' %>
+        <span class="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+          Pending
+        </span>
+      <% else %>
+        <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+          <%= booking&.status&.capitalize || 'Unknown' %>
+        </span>
+      <% end %>
+    </div>
+  </div>
+</div> 

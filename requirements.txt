@@ -1,0 +1,84 @@
+
+
+-- Build a Restaurant Booking Management System Prototype exclusively focusing on the front-end using Tailwind CSS and Rails.
+
+
+
+* Shared Header:
+- Home button(Main Page)
+- Restaurant map button
+- Settings button
+
+--------------------------------
+
+
+* Main Page:
+Interactive Calendar where bookings could be seen by the hour to a month time, there is a section for upcoming bookings and a section for current bookings.
+Populate the calendar with 50 bookings across the calendar from current booking to upcoming bookings. Each booking should have a card on the calendar that belongs to a client: table_number, name, email, phone, date of the booking etc
+
+
+--------------------------------
+* Restaurant Map Page:
+- Interactive map of the restaurants tables where you can navigate and add or remove bookings from tables etc.
+** Each table should have a booking card that shows the booking details.
+** Each table should be painted in a different color depending on the booking status.
+** Each table should have a number of seats.
+Populate the map with 50 bookings across the calendar from current booking to upcoming bookings. Each booking should have a card on the map that belongs to a client: table_number, name, email, phone, date of the booking etc
+
+
+A brief description my project.
+
+## Technologies Used
+- Ruby 3.2.2
+- Rails 7.0.6
+- PostgreSQL
+- TailwindCSS
+- Stimulus.js
+
+## Getting Started
+
+### Prerequisites
+- Ruby 3.2.2
+- Rails 7.0.6
+- PostgreSQL
+- Node.js & Yarn
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/yourrepository.git
+   ```
+
+2. Install dependencies
+   ```bash
+   bundle install
+   ```
+
+3. Setup database
+   ```bash
+   rails db:create
+   rails db:migrate
+   ```
+
+4. Compile assets
+   ```bash
+   rails assets:precompile
+   ```
+
+5. Start the development server
+   ```bash
+   bin/dev
+   ```
+
+# I built this prototype in < 1 hour.
+
+# I used TailwindCSS for styling.
+
+# I used Rails for the backend.
+
+# I used Stimulus for the frontend.
+
+# I used postgresql for the database.
+
+

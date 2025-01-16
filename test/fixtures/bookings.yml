@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  table: one
+  client_name: MyString
+  email: MyString
+  phone: MyString
+  booking_date: 2025-01-16 16:02:05
+
+two:
+  table: two
+  client_name: MyString
+  email: MyString
+  phone: MyString
+  booking_date: 2025-01-16 16:02:05

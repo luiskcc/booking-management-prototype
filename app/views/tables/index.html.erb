@@ -1,0 +1,147 @@
+<div class="space-y-8" data-controller="table">
+  <!-- Date Header with Occupancy -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold">Restaurant Floor Plan</h1>
+        <p class="text-gray-600 mt-1" data-table-target="currentDate"></p>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-4 py-2 text-sm font-medium rounded-md border border-gray-200 hover:bg-gray-100"
+                data-action="click->table#previousDay">
+          Previous Day
+        </button>
+        <button class="px-4 py-2 text-sm font-medium rounded-md border border-gray-200 hover:bg-gray-100"
+                data-action="click->table#today">
+          Today
+        </button>
+        <button class="px-4 py-2 text-sm font-medium rounded-md border border-gray-200 hover:bg-gray-100"
+                data-action="click->table#nextDay">
+          Next Day
+        </button>
+      </div>
+    </div>
+
+    <!-- Occupancy Meter -->
+    <div class="border-t pt-4">
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-semibold">Current Occupancy</h2>
+          <span class="text-2xl font-bold" data-table-target="occupancyCount">0</span>
+          <span class="text-gray-500">/ 300 seats</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+            <span class="text-sm text-gray-600" data-table-target="availableSeats">0</span>
+          </div>
+          <span class="text-gray-400">|</span>
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+            <span class="text-sm text-gray-600" data-table-target="occupiedSeats">0</span>
+          </div>
+          <span class="text-gray-400">|</span>
+          <div class="flex items-center">
+            <div class="w-3 h-3 rounded-full bg-yellow-500 mr-1"></div>
+            <span class="text-sm text-gray-600" data-table-target="reservedSeats">0</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%" data-table-target="occupancyBar"></div>
+      </div>
+      <div class="flex justify-between text-xs text-gray-500">
+        <span>0%</span>
+        <span>50%</span>
+        <span>100%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Restaurant Map Grid -->
+  <div class="grid grid-cols-3 gap-6 max-w-7xl mx-auto">
+    <% @tables.each do |table| %>
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <!-- Table Header -->
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h2 class="text-xl font-bold">Table <%= table.number %></h2>
+              <p class="text-gray-600"><%= table.seats %> seats</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium
+                           <%= table.status == 'available' ? 'bg-green-100 text-green-700' : 
+                               table.status == 'occupied' ? 'bg-red-100 text-red-700' : 
+                               'bg-yellow-100 text-yellow-700' %>">
+                <%= table.status&.capitalize || 'Available' %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Current Booking -->
+          <div class="mb-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-2">Current Booking</h3>
+            <div class="bg-gray-50 rounded p-3" data-table-target="currentBooking-<%= table.id %>">
+              <p class="text-gray-500 text-sm">No current booking</p>
+            </div>
+          </div>
+
+          <!-- Next Booking -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-700 mb-2">Next Booking</h3>
+            <div class="bg-gray-50 rounded p-3" data-table-target="nextBooking-<%= table.id %>">
+              <p class="text-gray-500 text-sm">No upcoming bookings</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-4 flex justify-end">
+            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    data-action="click->table#showTableDetails"
+                    data-table-id="<%= table.id %>">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Selected Table Details Modal -->
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden transition-opacity"
+       data-table-target="detailsModal"
+       data-action="click->table#hideTableDetails">
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+             data-action="click->table#stopPropagation">
+          <!-- Modal content will be dynamically inserted here -->
+          <div data-table-target="modalContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Card Template -->
+<template id="table-booking-card-template">
+  <div class="bg-white border rounded p-4">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="flex items-center gap-2">
+          <div class="font-medium" data-booking-name></div>
+          <span data-booking-status class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset"></span>
+        </div>
+        <div class="text-sm text-gray-600" data-booking-date></div>
+        <div class="text-sm text-gray-600" data-booking-phone></div>
+      </div>
+      <div class="flex space-x-2">
+        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" data-action="click->table#editBooking">Edit</button>
+        <button class="text-red-600 hover:text-red-800 text-sm font-medium" data-action="click->table#cancelBooking">Cancel</button>
+      </div>
+    </div>
+  </div>
+</template>

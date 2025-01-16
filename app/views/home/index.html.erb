@@ -1,0 +1,266 @@
+<div class="space-y-8" data-controller="calendar">
+  <!-- Header with Controls -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Restaurant Booking System</h1>
+      <button class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              data-action="click->calendar#showNewBookingModal">
+        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        New Booking
+      </button>
+    </div>
+
+    <!-- Calendar Controls -->
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <div class="flex rounded-md shadow-sm" role="group">
+          <button type="button"
+                  class="px-4 py-2 text-sm font-medium rounded-l-md border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500"
+                  data-calendar-target="weekView"
+                  data-action="click->calendar#switchToWeekView">
+            Week
+          </button>
+          <button type="button"
+                  class="px-4 py-2 text-sm font-medium rounded-r-md border border-l-0 border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500"
+                  data-calendar-target="monthView"
+                  data-action="click->calendar#switchToMonthView">
+            Month
+          </button>
+        </div>
+        <span class="text-lg font-semibold" data-calendar-target="dateDisplay"></span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button type="button"
+                class="p-2 rounded-full hover:bg-gray-100"
+                data-action="click->calendar#previousPeriod">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button type="button"
+                class="p-2 rounded-full hover:bg-gray-100"
+                data-action="click->calendar#today">
+          Today
+        </button>
+        <button type="button"
+                class="p-2 rounded-full hover:bg-gray-100"
+                data-action="click->calendar#nextPeriod">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar View -->
+  <div class="bg-white rounded-lg shadow" data-calendar-target="weekViewContainer">
+    <!-- Calendar Header -->
+    <div class="border-b border-gray-200">
+      <div class="grid grid-cols-8 text-sm">
+        <!-- Time column header -->
+        <div class="py-2 px-3 text-gray-500 border-r border-gray-200"></div>
+        <!-- Day headers -->
+        <% days = %w[Sun Mon Tue Wed Thu Fri Sat] %>
+        <% days.each do |day| %>
+          <div class="py-2 px-1 text-center font-semibold border-r border-gray-200 last:border-r-0">
+            <%= day %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="grid grid-cols-8" data-calendar-target="calendarGrid">
+      <!-- Time slots -->
+      <div class="border-r border-gray-200">
+        <% (11..22).each do |hour| %>
+          <div class="h-20 border-b border-gray-100 px-2 py-1 text-xs text-gray-500">
+            <%= hour > 12 ? "#{hour-12}:00 PM" : "#{hour}:00 AM" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Days grid -->
+      <% 7.times do |day_index| %>
+        <div class="border-r border-gray-200 last:border-r-0">
+          <% (11..22).each do |hour| %>
+            <div class="h-20 border-b border-gray-100 relative group hover:bg-gray-50"
+                 data-calendar-target="timeSlot"
+                 data-day="<%= day_index %>"
+                 data-hour="<%= hour %>">
+              <!-- Bookings will be inserted here -->
+              <div class="absolute inset-0 p-1">
+                <div class="space-y-1" data-calendar-target="bookingsContainer"></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Month View -->
+  <div class="bg-white rounded-lg shadow hidden" data-calendar-target="monthViewContainer">
+    <div class="border-b border-gray-200">
+      <div class="grid grid-cols-7 text-sm">
+        <% days = %w[Sun Mon Tue Wed Thu Fri Sat] %>
+        <% days.each do |day| %>
+          <div class="py-2 px-1 text-center font-semibold">
+            <%= day %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-7 gap-px bg-gray-200">
+      <% 35.times do |i| %>
+        <div class="bg-white min-h-[120px] p-2"
+             data-calendar-target="monthCell"
+             data-day="<%= i + 1 %>">
+          <div class="text-right text-sm text-gray-500"><%= i + 1 %></div>
+          <div class="mt-2 space-y-1" data-calendar-target="monthBookingsContainer"></div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Current Bookings Section -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-bold mb-4">Current Bookings</h2>
+    <div class="space-y-4" id="current-bookings">
+      <% @current_bookings&.each do |booking| %>
+        <%= render partial: 'bookings/booking_card', locals: { booking: booking } %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Upcoming Bookings Section -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-bold mb-4">Upcoming Bookings</h2>
+    <div class="space-y-4" id="upcoming-bookings">
+      <% @upcoming_bookings&.each do |booking| %>
+        <%= render partial: 'bookings/booking_card', locals: { booking: booking } %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- New Booking Modal -->
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden transition-opacity"
+       data-calendar-target="newBookingModal"
+       data-action="click->calendar#hideNewBookingModal">
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
+             data-action="click->calendar#stopPropagation">
+          <div class="absolute right-0 top-0 pr-4 pt-4">
+            <button type="button"
+                    class="rounded-md bg-white text-gray-400 hover:text-gray-500"
+                    data-action="click->calendar#hideNewBookingModal">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="sm:flex sm:items-start">
+            <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+              <h3 class="text-xl font-semibold leading-6 text-gray-900 mb-4">
+                New Booking
+              </h3>
+              <form data-action="submit->calendar#createBooking" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Client Name</label>
+                  <input type="text" name="client_name" required
+                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                         data-calendar-target="clientName">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <input type="email" name="email" required
+                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                         data-calendar-target="email">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Phone</label>
+                  <input type="tel" name="phone" required
+                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                         data-calendar-target="phone">
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Table</label>
+                  <select name="table_id" required
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          data-calendar-target="tableSelect">
+                    <option value="">Select a table</option>
+                    <!-- Tables will be populated dynamically -->
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Date and Time</label>
+                  <input type="datetime-local" name="booking_date" required
+                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                         data-calendar-target="bookingDate">
+                </div>
+
+                <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-2">
+                  <button type="submit"
+                          class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:w-auto">
+                    Create Booking
+                  </button>
+                  <button type="button"
+                          class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                          data-action="click->calendar#hideNewBookingModal">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Booking Card Template -->
+<template id="booking-card-template">
+  <div class="bg-blue-50 border border-blue-200 rounded p-1 text-xs overflow-hidden">
+    <div class="flex justify-between items-start gap-1">
+      <div class="truncate">
+        <div class="font-medium truncate" data-booking-name></div>
+        <div class="text-gray-600">Table <span data-booking-table></span></div>
+      </div>
+      <span data-booking-status class="inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset shrink-0"></span>
+    </div>
+  </div>
+</template>
+
+<!-- Modal Booking Card Template -->
+<template id="modal-booking-card-template">
+  <div class="bg-white border rounded-lg p-4 shadow-sm">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="flex items-center gap-2">
+          <div class="font-medium" data-booking-name></div>
+          <span data-booking-status class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset"></span>
+        </div>
+        <div class="text-sm text-gray-600" data-booking-date></div>
+        <div class="text-sm text-gray-600" data-booking-phone></div>
+        <div class="text-sm text-gray-600">Table <span data-booking-table></span></div>
+      </div>
+      <div class="flex space-x-2">
+        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium" data-action="click->calendar#editBooking">Edit</button>
+        <button class="text-red-600 hover:text-red-800 text-sm font-medium" data-action="click->calendar#cancelBooking">Cancel</button>
+      </div>
+    </div>
+  </div>
+</template>
